@@ -1,1 +1,1 @@
-# WebChess
+# Chessable
