@@ -1,0 +1,14 @@
+--style=allman
+--indent=spaces=4
+--indent-switches
+--indent-cases
+--pad-oper
+--unpad-paren
+--pad-header
+--align-pointer=name
+--align-reference=name
+--add-braces
+--convert-tabs
+--close-templates
+--attach-return-type
+--indent=force-tab-x=4

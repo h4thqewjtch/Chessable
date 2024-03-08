@@ -1,0 +1,16 @@
+release/archivetab.o
+release/batch.o
+release/clickablelabel.o
+release/draggablelabel.o
+release/gametab.o
+release/mainwindow.o
+release/piece.o
+release/playerstab.o
+release/profiletab.o
+release/main.o
+release/moc_batch.o
+release/moc_clickablelabel.o
+release/moc_draggablelabel.o
+release/moc_gametab.o
+release/moc_mainwindow.o
+release/moc_piece.o
