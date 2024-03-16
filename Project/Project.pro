@@ -18,6 +18,7 @@ SOURCES += \
     Piece/piece.cpp \
     PlayersTab/playerstab.cpp \
     ProfileTab/profiletab.cpp \
+    PromotionField/promotionfield.cpp \
     main.cpp
 
 HEADERS += \
@@ -30,9 +31,11 @@ HEADERS += \
     Piece/piece.h \
     PlayersTab/playerstab.h \
     ProfileTab/profiletab.h \
+    PromotionField/promotionfield.h
 
 FORMS += \
-    MainWindow/mainwindow.ui
+    MainWindow/mainwindow.ui \
+    PromotionField/promotionField.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -40,4 +43,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \
-    .astylerc
+    .astylerc \
+    model.qmodel

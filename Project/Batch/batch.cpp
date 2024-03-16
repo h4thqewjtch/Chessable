@@ -5,36 +5,104 @@ void Batch::slot_to_remove_opponent_piece_label(DraggableLabel *pieceLabel)
     emit signal_to_remove_opponent_piece_label(pieceLabel);
 }
 
+void Batch::slot_to_castling(QPoint &newRookPosition)
+{
+    if (newRookPosition.x() == 3)
+    {
+        if (newRookPosition.y() == 0)
+        {
+            blackRooks[0]->update_rook_position_on_castling(newRookPosition.x(), newRookPosition.y());
+        }
+        else
+        {
+            whiteRooks[0]->update_rook_position_on_castling(newRookPosition.x(), newRookPosition.y());
+        }
+    }
+    else
+    {
+        if (newRookPosition.y() == 0)
+        {
+            blackRooks[1]->update_rook_position_on_castling(newRookPosition.x(), newRookPosition.y());
+        }
+        else
+        {
+            whiteRooks[1]->update_rook_position_on_castling(newRookPosition.x(), newRookPosition.y());
+        }
+    }
+}
+
+void Batch::slot_to_promote_pawn(DraggableLabel *pieceLabel, QPoint &piecePosition, QString &pieceColor)
+{
+    currentNewPiecePosition = piecePosition;
+    currentNewPieceColor = pieceColor;
+    emit signal_to_promote_pawn(pieceLabel, pieceColor);
+}
+
+void Batch::slot_to_show_move(QString currentMove)
+{
+    emit signal_to_show_move(currentMove);
+}
+
+
 void Batch::connect_slots_with_signals()
 {
     for (int i = 0; i < 8; i++)
     {
         connect(blackPawns[i], &Piece::signal_to_remove_opponent_piece_label, this, &Batch::slot_to_remove_opponent_piece_label);
         connect(whitePawns[i], &Piece::signal_to_remove_opponent_piece_label, this, &Batch::slot_to_remove_opponent_piece_label);
+
+        connect(blackPawns[i], &Piece::signal_to_promote_pawn, this, &Batch::slot_to_promote_pawn);
+        connect(whitePawns[i], &Piece::signal_to_promote_pawn, this, &Batch::slot_to_promote_pawn);
+
+        connect(blackPawns[i], &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
+        connect(whitePawns[i], &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
     }
     for (int i = 0; i < 2; i++)
     {
         connect(blackRooks[i], &Piece::signal_to_remove_opponent_piece_label, this, &Batch::slot_to_remove_opponent_piece_label);
         connect(whiteRooks[i], &Piece::signal_to_remove_opponent_piece_label, this, &Batch::slot_to_remove_opponent_piece_label);
+
+        connect(blackRooks[i], &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
+        connect(whiteRooks[i], &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
+
     }
     for (int i = 0; i < 2; i++)
     {
         connect(blackKnights[i], &Piece::signal_to_remove_opponent_piece_label, this, &Batch::slot_to_remove_opponent_piece_label);
         connect(whiteKnights[i], &Piece::signal_to_remove_opponent_piece_label, this, &Batch::slot_to_remove_opponent_piece_label);
+
+        connect(blackKnights[i], &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
+        connect(whiteKnights[i], &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
+
     }
     for (int i = 0; i < 2; i++)
     {
         connect(blackBishops[i], &Piece::signal_to_remove_opponent_piece_label, this, &Batch::slot_to_remove_opponent_piece_label);
         connect(whiteBishops[i], &Piece::signal_to_remove_opponent_piece_label, this, &Batch::slot_to_remove_opponent_piece_label);
+
+        connect(blackBishops[i], &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
+        connect(whiteBishops[i], &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
+
     }
 
     connect(blackQueen, &Piece::signal_to_remove_opponent_piece_label, this, &Batch::slot_to_remove_opponent_piece_label);
     connect(whiteQueen, &Piece::signal_to_remove_opponent_piece_label, this, &Batch::slot_to_remove_opponent_piece_label);
 
+    connect(blackQueen, &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
+    connect(whiteQueen, &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
+
+
     connect(blackKing, &Piece::signal_to_remove_opponent_piece_label, this, &Batch::slot_to_remove_opponent_piece_label);
     connect(whiteKing, &Piece::signal_to_remove_opponent_piece_label, this, &Batch::slot_to_remove_opponent_piece_label);
 
+    connect(blackKing, &Piece::signal_to_castling, this, &Batch::slot_to_castling);
+    connect(whiteKing, &Piece::signal_to_castling, this, &Batch::slot_to_castling);
+
+    connect(blackKing, &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
+    connect(whiteKing, &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
+
 }
+
 
 void Batch::put_rooks()
 {
@@ -198,4 +266,18 @@ Piece *Batch::get_piece_on_position(int ranksPosition, int filesPosition)
     }
     return blackKing;
 
+}
+
+void Batch::set_current_new_piece_type_and_image_path(QString pieceType, QString pieceImagePath)
+{
+    currentNewPieceType = pieceType;
+    currentNewPieceImagePath = pieceImagePath;
+    newPiecesCount++;
+    newPieces[newPiecesCount] = new Piece(currentNewPiecePosition.x(), currentNewPiecePosition.y(), currentNewPieceColor, currentNewPieceType, currentNewPieceImagePath);
+    connect(newPieces[newPiecesCount], &Piece::signal_to_remove_opponent_piece_label, this, &Batch::slot_to_remove_opponent_piece_label);
+}
+
+Piece *Batch::get_current_new_piece()
+{
+    return newPieces[newPiecesCount];
 }

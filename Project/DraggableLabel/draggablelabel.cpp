@@ -29,7 +29,7 @@ void DraggableLabel::mouseReleaseEvent(QMouseEvent *mouseReleaseEvent)
     QLabel::mouseReleaseEvent(mouseReleaseEvent); // Передача события в базовый класс QLabel
 }
 
-void DraggableLabel::adjust_label_position(const QPoint &position)
+void DraggableLabel::update_label_position(const QPoint &position)
 {
     move(position);
     startPosition = position;

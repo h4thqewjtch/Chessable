@@ -23,9 +23,6 @@ protected:
 public:
     explicit ClickableLabel(QString name, QWidget *parent = Q_NULLPTR) : QLabel(parent), name(name)  {}
 
-// signals:
-//     void clicked();
-
 };
 
 #endif // CLICKABLELABEL_H

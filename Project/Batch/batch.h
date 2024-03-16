@@ -32,9 +32,18 @@ private:
     Piece *blackKing;
     Piece *whiteKing;
 
+    Piece *newPieces[16];
+    int newPiecesCount = -1;
+    QString currentNewPieceColor;
+    QPoint currentNewPiecePosition;
+    QString currentNewPieceType;
+    QString currentNewPieceImagePath;
+
 private slots:
     void slot_to_remove_opponent_piece_label(DraggableLabel *);
-
+    void slot_to_castling(QPoint &);
+    void slot_to_promote_pawn(DraggableLabel *, QPoint &, QString &);
+    void slot_to_show_move(QString);
     void connect_slots_with_signals();
 
 protected:
@@ -54,6 +63,8 @@ protected:
 
 signals:
     void signal_to_remove_opponent_piece_label(DraggableLabel *);
+    void signal_to_promote_pawn(DraggableLabel *, QString &);
+    void signal_to_show_move(QString);
 
 public:
     Batch(QObject *parent = nullptr) : QObject{parent}
@@ -88,6 +99,10 @@ public:
     ClickableLabel *get_chess_board();
 
     Piece *get_piece_on_position(int, int);
+
+    void set_current_new_piece_type_and_image_path(QString, QString);
+
+    Piece *get_current_new_piece();
 };
 
 #endif // BATCH_H

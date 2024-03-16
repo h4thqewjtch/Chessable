@@ -23,7 +23,7 @@ protected:
 public:
     DraggableLabel(QWidget *parent = nullptr) : QLabel(parent) {}
 
-    void adjust_label_position(const QPoint &);
+    void update_label_position(const QPoint &);
 
 signals:
     void move_label(const QPoint &);

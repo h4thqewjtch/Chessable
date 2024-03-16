@@ -13,17 +13,18 @@ MainWindow::MainWindow(QWidget *parent)
     archiveTab = new ArchiveTab();
     profileTab = new ProfileTab();
 
-    //layout = new QVBoxLayout(ui->widget);
 
     add_piece_labels();
 
     connect(gameTab, &GameTab::signal_to_remove_opponent_piece_label, this, &MainWindow::slot_to_remove_opponent_piece_label);
+    connect(gameTab, &GameTab::signal_to_promote_pawn, this, &MainWindow::slot_to_promote_pawn);
+    connect(gameTab, &GameTab::signal_to_show_move, this, &MainWindow::slot_to_show_move);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete layout;
+    //delete layout;
     delete gameTab;
     delete playersTab;
     delete archiveTab;
@@ -49,7 +50,6 @@ void MainWindow::add_piece_labels()
             gameTab->get_batch()->get_piece_on_position(j, i)->get_piece_label()->setParent(ui->widget);
         }
     }
-    //ui->widget->setLayout(layout);
 }
 
 void MainWindow::slot_to_remove_opponent_piece_label(DraggableLabel *pieceLabel)
@@ -57,47 +57,44 @@ void MainWindow::slot_to_remove_opponent_piece_label(DraggableLabel *pieceLabel)
     pieceLabel->deleteLater();
 }
 
-void MainWindow::on_minute1Button_clicked()
+void MainWindow::slot_to_promote_pawn(DraggableLabel *pieceLabel, QString &pieceColor)
 {
-
+    pieceLabel->deleteLater();
+    PromotionField promotionField = PromotionField(pieceColor);
+    promotionField.exec();
+    gameTab->get_batch()->set_current_new_piece_type_and_image_path(promotionField.get_piece_type(), promotionField.get_piece_image_path());
+    gameTab->get_batch()->get_current_new_piece()->get_piece_label()->setParent(ui->widget);
+    gameTab->get_batch()->get_current_new_piece()->get_piece_label()->show();
 }
 
-
-void MainWindow::on_minutes3Button_clicked()
+void MainWindow::slot_to_show_move(QString currentMove)
 {
-
+    if (!currentMove.contains(". "))
+    {
+        currentMove = "                           " + currentMove;
+    }
+    ui->movesList->addItem(currentMove);
+    ui->movesList->setCurrentRow(ui->movesList->count() - 1);
+    if (currentMove.contains("#"))
+    {
+        if (currentMove.contains(". "))
+        {
+            QMessageBox::information(this, "End of game", "White win!");
+        }
+        else
+        {
+            QMessageBox::information(this, "End of game", "Black win!");
+        }
+        gameTab->end_batch();
+        ui->tabWidget->setCurrentIndex(0);
+    }
+    else if (currentMove.contains("="))
+    {
+        QMessageBox::information(this, "End of game", "Draw");
+        gameTab->end_batch();
+        ui->tabWidget->setCurrentIndex(0);
+    }
 }
-
-
-void MainWindow::on_minutes5Button_clicked()
-{
-
-}
-
-
-void MainWindow::on_minutes10Button_clicked()
-{
-
-}
-
-
-void MainWindow::on_minutes15Button_clicked()
-{
-
-}
-
-
-void MainWindow::on_minutes30Button_clicked()
-{
-
-}
-
-
-void MainWindow::on_playButton_clicked()
-{
-
-}
-
 
 void MainWindow::on_offerADrawButton_clicked()
 {
