@@ -1,7 +1,10 @@
 #ifndef PROMOTIONFIELD_H
 #define PROMOTIONFIELD_H
 
+#include <QCursor>
 #include <QDialog>
+#include <QPainter>
+#include <QRect>
 
 namespace Ui
 {
@@ -20,6 +23,8 @@ private:
     QString pieceImagePath;
 
 private slots:
+    void set_button_invisible(QPushButton *);
+
     void on_queenButton_clicked();
 
     void on_rookButton_clicked();
@@ -30,12 +35,16 @@ private slots:
 
     void on_pawnButton_clicked();
 
+protected:
+    void paintEvent(QPaintEvent *event) override;
+
 public:
     explicit PromotionField(QString, QWidget *parent = nullptr);
     ~PromotionField();
 
     QString get_piece_type();
     QString get_piece_image_path();
+    void set_piece(QString, QString, QString);
 
 };
 

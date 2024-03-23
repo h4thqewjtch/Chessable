@@ -9,8 +9,7 @@ class Batch: public QObject
     Q_OBJECT
 
 private:
-    int chessBoardPixelWidth = 512;
-    int chessBoardPixelHeight = 512;
+    QString playerColor;
 
     ClickableLabel *chessBoard;
 
@@ -40,10 +39,11 @@ private:
     QString currentNewPieceImagePath;
 
 private slots:
+    void slot_to_get_player_piece_color();
     void slot_to_remove_opponent_piece_label(DraggableLabel *);
     void slot_to_castling(QPoint &);
     void slot_to_promote_pawn(DraggableLabel *, QPoint &, QString &);
-    void slot_to_show_move(QString);
+    void slot_to_show_move(QString, int, QPair<QPoint, QPoint>);
     void connect_slots_with_signals();
 
 protected:
@@ -64,15 +64,12 @@ protected:
 signals:
     void signal_to_remove_opponent_piece_label(DraggableLabel *);
     void signal_to_promote_pawn(DraggableLabel *, QString &);
-    void signal_to_show_move(QString);
+    void signal_to_show_move(QString, int, QPair<QPoint, QPoint>);
 
 public:
     Batch(QObject *parent = nullptr) : QObject{parent}
     {
         chessBoard = new ClickableLabel("chessBoard");
-        QPixmap chessBoardPix("../Materials/Images/chessboard_white.jpg");
-        chessBoard->setPixmap(chessBoardPix.scaled(chessBoardPixelWidth, chessBoardPixelHeight, Qt::KeepAspectRatio));
-        chessBoard->setGeometry(0, 0, chessBoardPixelWidth, chessBoardPixelHeight);
 
         put_rooks();
         put_knights();
@@ -95,6 +92,8 @@ public:
         clear_kings();
         clear_pawns();
     }
+
+    void set_player_color(QString);
 
     ClickableLabel *get_chess_board();
 

@@ -1,5 +1,11 @@
 #include "batch.h"
 
+
+void Batch::slot_to_get_player_piece_color()
+{
+    Piece::set_player_color(playerColor);
+}
+
 void Batch::slot_to_remove_opponent_piece_label(DraggableLabel *pieceLabel)
 {
     emit signal_to_remove_opponent_piece_label(pieceLabel);
@@ -38,14 +44,15 @@ void Batch::slot_to_promote_pawn(DraggableLabel *pieceLabel, QPoint &piecePositi
     emit signal_to_promote_pawn(pieceLabel, pieceColor);
 }
 
-void Batch::slot_to_show_move(QString currentMove)
+void Batch::slot_to_show_move(QString currentMoveRecord, int superiority, QPair<QPoint, QPoint> currentMove)
 {
-    emit signal_to_show_move(currentMove);
+    emit signal_to_show_move(currentMoveRecord, superiority, currentMove);
 }
 
 
 void Batch::connect_slots_with_signals()
 {
+
     for (int i = 0; i < 8; i++)
     {
         connect(blackPawns[i], &Piece::signal_to_remove_opponent_piece_label, this, &Batch::slot_to_remove_opponent_piece_label);
@@ -56,6 +63,9 @@ void Batch::connect_slots_with_signals()
 
         connect(blackPawns[i], &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
         connect(whitePawns[i], &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
+
+        connect(blackPawns[i], &Piece::signal_to_get_player_piece_color, this, &Batch::slot_to_get_player_piece_color);
+        connect(whitePawns[i], &Piece::signal_to_get_player_piece_color, this, &Batch::slot_to_get_player_piece_color);
     }
     for (int i = 0; i < 2; i++)
     {
@@ -64,6 +74,9 @@ void Batch::connect_slots_with_signals()
 
         connect(blackRooks[i], &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
         connect(whiteRooks[i], &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
+
+        connect(blackRooks[i], &Piece::signal_to_get_player_piece_color, this, &Batch::slot_to_get_player_piece_color);
+        connect(whiteRooks[i], &Piece::signal_to_get_player_piece_color, this, &Batch::slot_to_get_player_piece_color);
 
     }
     for (int i = 0; i < 2; i++)
@@ -74,6 +87,9 @@ void Batch::connect_slots_with_signals()
         connect(blackKnights[i], &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
         connect(whiteKnights[i], &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
 
+        connect(blackKnights[i], &Piece::signal_to_get_player_piece_color, this, &Batch::slot_to_get_player_piece_color);
+        connect(whiteKnights[i], &Piece::signal_to_get_player_piece_color, this, &Batch::slot_to_get_player_piece_color);
+
     }
     for (int i = 0; i < 2; i++)
     {
@@ -83,6 +99,9 @@ void Batch::connect_slots_with_signals()
         connect(blackBishops[i], &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
         connect(whiteBishops[i], &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
 
+        connect(blackBishops[i], &Piece::signal_to_get_player_piece_color, this, &Batch::slot_to_get_player_piece_color);
+        connect(whiteBishops[i], &Piece::signal_to_get_player_piece_color, this, &Batch::slot_to_get_player_piece_color);
+
     }
 
     connect(blackQueen, &Piece::signal_to_remove_opponent_piece_label, this, &Batch::slot_to_remove_opponent_piece_label);
@@ -90,6 +109,9 @@ void Batch::connect_slots_with_signals()
 
     connect(blackQueen, &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
     connect(whiteQueen, &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
+
+    connect(blackQueen, &Piece::signal_to_get_player_piece_color, this, &Batch::slot_to_get_player_piece_color);
+    connect(whiteQueen, &Piece::signal_to_get_player_piece_color, this, &Batch::slot_to_get_player_piece_color);
 
 
     connect(blackKing, &Piece::signal_to_remove_opponent_piece_label, this, &Batch::slot_to_remove_opponent_piece_label);
@@ -101,6 +123,9 @@ void Batch::connect_slots_with_signals()
     connect(blackKing, &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
     connect(whiteKing, &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
 
+    connect(blackKing, &Piece::signal_to_get_player_piece_color, this, &Batch::slot_to_get_player_piece_color);
+    connect(whiteKing, &Piece::signal_to_get_player_piece_color, this, &Batch::slot_to_get_player_piece_color);
+
 }
 
 
@@ -108,8 +133,8 @@ void Batch::put_rooks()
 {
     for (int i = 0, j = 0; i < 2; i++, j += 7)
     {
-        blackRooks[i] = new Piece(j, 0, "BLACK", "rook", "../Materials/Images/rook_black.png");
-        whiteRooks[i] = new Piece(j, 7, "WHITE", "rook", "../Materials/Images/rook_white.png");
+        blackRooks[i] = new Piece(j, 0, "BLACK", "rook", ":/Materials/Images/rook_black.png");
+        whiteRooks[i] = new Piece(j, 7, "WHITE", "rook", ":/Materials/Images/rook_white.png");
     }
 }
 
@@ -117,8 +142,8 @@ void Batch::put_knights()
 {
     for (int i = 0, j = 1; i < 2; i++, j += 5)
     {
-        blackKnights[i] = new Piece(j, 0, "BLACK", "knight", "../Materials/Images/knight_black.png");
-        whiteKnights[i] = new Piece(j, 7, "WHITE", "knight", "../Materials/Images/knight_white.png");
+        blackKnights[i] = new Piece(j, 0, "BLACK", "knight", ":/Materials/Images/knight_black.png");
+        whiteKnights[i] = new Piece(j, 7, "WHITE", "knight", ":/Materials/Images/knight_white.png");
     }
 }
 
@@ -126,29 +151,29 @@ void Batch::put_bishops()
 {
     for (int i = 0, j = 2; i < 2; i++, j += 3)
     {
-        blackBishops[i] = new Piece(j, 0, "BLACK", "bishop", "../Materials/Images/bishop_black.png");
-        whiteBishops[i] = new Piece(j, 7, "WHITE", "bishop", "../Materials/Images/bishop_white.png");
+        blackBishops[i] = new Piece(j, 0, "BLACK", "bishop", ":/Materials/Images/bishop_black.png");
+        whiteBishops[i] = new Piece(j, 7, "WHITE", "bishop", ":/Materials/Images/bishop_white.png");
     }
 }
 
 void Batch::put_queens()
 {
-    blackQueen = new Piece(3, 0, "BLACK", "queen", "../Materials/Images/queen_black.png");
-    whiteQueen = new Piece(3, 7, "WHITE", "queen", "../Materials/Images/queen_white.png");
+    blackQueen = new Piece(3, 0, "BLACK", "queen", ":/Materials/Images/queen_black.png");
+    whiteQueen = new Piece(3, 7, "WHITE", "queen", ":/Materials/Images/queen_white.png");
 }
 
 void Batch::put_kings()
 {
-    blackKing = new Piece(4, 0, "BLACK", "king", "../Materials/Images/king_black.png");
-    whiteKing = new Piece(4, 7, "WHITE", "king", "../Materials/Images/king_white.png");
+    blackKing = new Piece(4, 0, "BLACK", "king", ":/Materials/Images/king_black.png");
+    whiteKing = new Piece(4, 7, "WHITE", "king", ":/Materials/Images/king_white.png");
 }
 
 void Batch::put_pawns()
 {
     for (int i = 0, j = 0; i < 8; i++, j++)
     {
-        blackPawns[i] = new Piece(j, 1, "BLACK", "pawn", "../Materials/Images/pawn_black.png");
-        whitePawns[i] = new Piece(j, 6, "WHITE", "pawn", "../Materials/Images/pawn_white.png");
+        blackPawns[i] = new Piece(j, 1, "BLACK", "pawn", ":/Materials/Images/pawn_black.png");
+        whitePawns[i] = new Piece(j, 6, "WHITE", "pawn", ":/Materials/Images/pawn_white.png");
     }
 }
 
@@ -200,6 +225,11 @@ void Batch::clear_pawns()
         delete whitePawns[i];
     }
 
+}
+
+void Batch::set_player_color(QString playerColor)
+{
+    this->playerColor = playerColor;
 }
 
 
@@ -275,6 +305,7 @@ void Batch::set_current_new_piece_type_and_image_path(QString pieceType, QString
     newPiecesCount++;
     newPieces[newPiecesCount] = new Piece(currentNewPiecePosition.x(), currentNewPiecePosition.y(), currentNewPieceColor, currentNewPieceType, currentNewPieceImagePath);
     connect(newPieces[newPiecesCount], &Piece::signal_to_remove_opponent_piece_label, this, &Batch::slot_to_remove_opponent_piece_label);
+    connect(newPieces[newPiecesCount], &Piece::signal_to_show_move, this, &Batch::slot_to_show_move);
 }
 
 Piece *Batch::get_current_new_piece()

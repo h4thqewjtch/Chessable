@@ -10,9 +10,9 @@ void GameTab::slot_to_promote_pawn(DraggableLabel *pieceLabel, QString &pieceCol
     emit signal_to_promote_pawn(pieceLabel, pieceColor);
 }
 
-void GameTab::slot_to_show_move(QString currentMove)
+void GameTab::slot_to_show_move(QString currentMoveRecord, int superiority, QPair<QPoint, QPoint> currentMove)
 {
-    emit signal_to_show_move(currentMove);
+    emit signal_to_show_move(currentMoveRecord, superiority, currentMove);
 }
 
 void GameTab::set_batch()

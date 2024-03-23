@@ -3,6 +3,7 @@
 
 #include <QList>
 #include <QMap>
+#include <QDebug>
 
 #include "../DraggableLabel/draggablelabel.h"
 
@@ -23,14 +24,14 @@ class Piece: public QObject
     Q_OBJECT
 
 private:
+    static QString playerColor;
     static QString currentSideToMove;
     static QMap<QPair<int, int>, PieceInfo> pieces;
-
     static QPair<int, int> blackKingPosition;
     static QPair<int, int> whiteKingPosition;
     static QPair<int, int> enPassantPawnPosition;
     static QList<QString> movesList;
-    //static int superiority;
+    static int superiority;
     PieceInfo pieceInfo;
     QString currentMove;
 
@@ -99,10 +100,11 @@ public slots:
     void update_rook_position_on_castling(int, int);
 
 signals:
+    void signal_to_get_player_piece_color();
     void signal_to_remove_opponent_piece_label(DraggableLabel *);
     void signal_to_castling(QPoint &);
     void signal_to_promote_pawn(DraggableLabel *, QPoint &, QString &);
-    void signal_to_show_move(QString);
+    void signal_to_show_move(QString, int, QPair<QPoint, QPoint>);
 
 public:
     Piece(int ranksPosition = 0, int filesPosition = 0, QString pieceColor = "", QString pieceType = "", QString imagePath = "", QObject *parent = nullptr)
@@ -123,6 +125,8 @@ public:
     QMap<int, int> get_exist_white_piece_map();
     QMap<int, int> get_exist_black_piece_map();
     bool is_ready_to_castling() const;
+
+    static void set_player_color(QString);
 
     static QMap<int, int> existWhitePiecesMap;
     static QMap<int, int> existBlackPiecesMap;

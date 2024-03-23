@@ -1,0 +1,20 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Materials/Images/bishop_black.png</file>
+        <file>Materials/Images/bishop_white.png</file>
+        <file>Materials/Images/chessable.png</file>
+        <file>Materials/Images/chessboard_black.jpg</file>
+        <file>Materials/Images/chessboard_white.jpg</file>
+        <file>Materials/Images/king_black.png</file>
+        <file>Materials/Images/king_white.png</file>
+        <file>Materials/Images/knight_black.png</file>
+        <file>Materials/Images/knight_white.png</file>
+        <file>Materials/Images/pawn_black.png</file>
+        <file>Materials/Images/pawn_white.png</file>
+        <file>Materials/Images/queen_black.png</file>
+        <file>Materials/Images/queen_white.png</file>
+        <file>Materials/Images/rook_black.png</file>
+        <file>Materials/Images/rook_white.png</file>
+        <file>Materials/Images/best_batch.gif</file>
+    </qresource>
+</RCC>

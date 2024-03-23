@@ -1,5 +1,7 @@
 #include "piece.h"
 
+QString Piece::playerColor = "";
+
 QString Piece::currentSideToMove = "WHITE";
 
 QMap<QPair<int, int>, PieceInfo> Piece::pieces;
@@ -16,7 +18,7 @@ QPair<int, int> Piece::enPassantPawnPosition = QPair<int, int>(-1, -1);
 
 QList<QString> Piece::movesList;
 
-//int Piece::superiority = 0;
+int Piece::superiority = 0;
 
 
 void Piece::initialize_piece_info(int ranksPosition = 0, int filesPosition = 0, QString pieceColor = "", QString pieceType = "")
@@ -29,33 +31,87 @@ void Piece::initialize_piece_info(int ranksPosition = 0, int filesPosition = 0, 
     pieceInfo.type = pieceType;
     if (pieceType == "pawn")
     {
-        pieceColor == "WHITE" ? existWhitePiecesMap[1]++ : existBlackPiecesMap[1]++;
+        if (pieceColor == "WHITE")
+        {
+            existWhitePiecesMap[1]++;
+            superiority ++;
+        }
+        else
+        {
+            existBlackPiecesMap[1]++;
+            superiority --;
+        }
         pieceInfo.readyToCastling = false;
+
     }
     else if (pieceType == "knight")
     {
-        pieceColor == "WHITE" ? existWhitePiecesMap[3]++ : existBlackPiecesMap[3]++;
+        if (pieceColor == "WHITE")
+        {
+            existWhitePiecesMap[3]++;
+            superiority += 3;
+        }
+        else
+        {
+            existBlackPiecesMap[3]++;
+            superiority -= 3;
+        }
         pieceInfo.readyToCastling = false;
     }
     else if (pieceType == "bishop")
     {
-        pieceColor == "WHITE" ? existWhitePiecesMap[3]++ : existBlackPiecesMap[3]++;
+        if (pieceColor == "WHITE")
+        {
+            existWhitePiecesMap[3]++;
+            superiority += 3;
+        }
+        else
+        {
+            existBlackPiecesMap[3]++;
+            superiority -= 3;
+        }
         pieceInfo.readyToCastling = false;
     }
     else if (pieceType == "rook")
     {
-        pieceColor == "WHITE" ? existWhitePiecesMap[5]++ : existBlackPiecesMap[5]++;
+        if (pieceColor == "WHITE")
+        {
+            existWhitePiecesMap[5]++;
+            superiority += 5;
+        }
+        else
+        {
+            existBlackPiecesMap[5]++;
+            superiority -= 5;
+        }
         pieceInfo.readyToCastling = true;
     }
     else if (pieceType == "queen")
     {
-        pieceColor == "WHITE" ? existWhitePiecesMap[9]++ : existBlackPiecesMap[9]++;
+        if (pieceColor == "WHITE")
+        {
+            existWhitePiecesMap[9]++;
+            superiority += 9;
+        }
+        else
+        {
+            existBlackPiecesMap[9]++;
+            superiority -= 9;
+        }
         pieceInfo.readyToCastling = false;
     }
     else if (pieceType == "king")
     {
-        pieceColor == "WHITE" ? existWhitePiecesMap[0]++ : existBlackPiecesMap[0]++;
-        pieceColor == "WHITE" ? whiteKingPosition = QPair<int, int>(ranksPosition, filesPosition) : blackKingPosition = QPair<int, int>(ranksPosition, filesPosition);
+        if (pieceColor == "WHITE")
+        {
+            existWhitePiecesMap[0]++;
+            whiteKingPosition = QPair<int, int>(ranksPosition, filesPosition);
+        }
+        else
+        {
+            existBlackPiecesMap[0]++;
+            blackKingPosition = QPair<int, int>(ranksPosition, filesPosition);
+        }
         pieceInfo.readyToCastling = true;
     }
     pieceInfo.label = new DraggableLabel();
@@ -70,8 +126,20 @@ void Piece::set_piece_label(QString imagePath = "")
 
 void Piece::update_piece_position(const QPoint &piecePosition)
 {
+    if (playerColor == "")
+    {
+        emit signal_to_get_player_piece_color();
+    }
     QPoint newPiecePosition = piecePosition;
-    set_piece_position(newPiecePosition);
+    if ((pieceInfo.label->pressed() && playerColor == pieceInfo.color) || !pieceInfo.label->pressed())
+    {
+        set_piece_position(newPiecePosition);
+        pieceInfo.label->set_pressed_false();
+    }
+    else
+    {
+        newPiecePosition = QPoint(pieceInfo.ranksPosition * pieceInfo.pixelWidth, pieceInfo.filesPosition * pieceInfo.pixelHeight);
+    }
     pieceInfo.label->update_label_position(newPiecePosition);
 }
 
@@ -118,12 +186,31 @@ void Piece::set_piece_position(QPoint &newPiecePosition)
                 QString file = QString::number(qAbs(pieceInfo.filesPosition + 1 - 9));
                 currentMove += "-" + rank + file;
             }
-
             if (newPiecePosition != currentPiecePosition
                     && is_pawn_on_promotion_field(newPiecePosition.y()))
             {
                 QPoint pos = QPoint(newRanksPosition, newFilesPosition);
                 emit signal_to_promote_pawn(pieceInfo.label, pos, pieceInfo.color);
+                if (pieces[QPair<int, int>(newRanksPosition, newFilesPosition)].type == "pawn")
+                {
+                    currentMove = "p:" + currentMove;
+                }
+                else if (pieces[QPair<int, int>(newRanksPosition, newFilesPosition)].type == "rook")
+                {
+                    currentMove = "R:" + currentMove;
+                }
+                else if (pieces[QPair<int, int>(newRanksPosition, newFilesPosition)].type == "knight")
+                {
+                    currentMove = "N:" + currentMove;
+                }
+                else if (pieces[QPair<int, int>(newRanksPosition, newFilesPosition)].type == "bishop")
+                {
+                    currentMove = "B:" + currentMove;
+                }
+                else if (pieces[QPair<int, int>(newRanksPosition, newFilesPosition)].type == "queen")
+                {
+                    currentMove = "Q:" + currentMove;
+                }
                 checkToWhitePosition = find_check_to(futureWhiteKingPosition, "WHITE", pieces);
                 checkToBlackPosition = find_check_to(futureBlackKingPosition, "BLACK", pieces);
             }
@@ -214,15 +301,25 @@ void Piece::set_piece_position(QPoint &newPiecePosition)
                 {
                     newPiecePosition = update_king_position(newRanksPosition, newFilesPosition);
                 }
-            }
+                else
+                {
+                    if (newPiecePosition.x() / pieceInfo.pixelWidth < 5)
+                    {
+                        currentMove = "0-0-0";
+                    }
+                    else
+                    {
+                        currentMove = "0-0";
+                    }
 
-            if (!currentMove.contains("x"))
+                }
+            }
+            if (!currentMove.contains("x") && !currentMove.contains("0-0"))
             {
                 QString rank = set_rank_letter_from(pieceInfo.ranksPosition);
                 QString file = QString::number(qAbs(pieceInfo.filesPosition + 1 - 9));
                 currentMove += "-K" + rank + file;
             }
-
             if (newPiecePosition != currentPiecePosition)
             {
                 pieceInfo.color == "WHITE" ? whiteKingPosition = QPair<int, int>(newRanksPosition, newFilesPosition)
@@ -285,14 +382,16 @@ void Piece::set_piece_position(QPoint &newPiecePosition)
     }
     if (newPiecePosition != currentPiecePosition)
     {
-        //qDebug() << movesList;
-        QString move;
+        QString moveRecord;
         if (currentSideToMove == "BLACK")
         {
-            move += QString::number(movesList.size() / 2 + 1) + ". ";
+            moveRecord += QString::number(movesList.size() / 2 + 1) + ". ";
         }
-        move += movesList[movesList.size() - 1];
-        emit signal_to_show_move(move);
+        moveRecord += movesList[movesList.size() - 1];
+
+        QPair<QPoint, QPoint> currentMove = QPair<QPoint, QPoint>(currentPiecePosition, newPiecePosition);
+        emit signal_to_show_move(moveRecord, superiority, currentMove);
+        superiority = 0;
     }
 
 }
@@ -533,7 +632,6 @@ bool Piece::is_checkmate_to(QPair<int, int> kingPosition, QPair<int, int> checkP
     QPair<int, int> direction = QPair<int, int>(ranksDirection, filesDirection);
     QPair<int, int> spaces = get_checkmate_direction_from(direction, kingPosition);
     bool can_king_move = check_king_moves(kingPosition);
-    //qDebug() << "can_king_move" << can_king_move;
     return (get_checkmate_position(spaces, kingPosition, checkPosition) == QPair<int, int>(-1, -1) && can_king_move == false);
 }
 
@@ -1407,6 +1505,7 @@ void Piece::remove_opponent_piece_label(int newRanksPosition, int newFilesPositi
         }
         if (pieces.value(QPair<int, int>(newRanksPosition, newFilesPosition)).type == "pawn")
         {
+
             QString ranks = set_rank_letter_from(newRanksPosition);
             QString file = QString::number(qAbs(newFilesPosition + 1 - 9));
             currentMove += "x" + ranks + file;
@@ -1414,80 +1513,92 @@ void Piece::remove_opponent_piece_label(int newRanksPosition, int newFilesPositi
             if (pieces.value(QPair<int, int>(newRanksPosition, newFilesPosition)).color == "WHITE")
             {
                 existWhitePiecesMap[1]--;
-                //superiority=-1;
+                superiority  = -1;
             }
             else
             {
                 existBlackPiecesMap[1]--;
-                //superiority=-1;
+                superiority = 1;
             }
         }
         else if (pieces.value(QPair<int, int>(newRanksPosition, newFilesPosition)).type == "knight")
         {
+
             QString ranks = set_rank_letter_from(newRanksPosition);
             QString file = QString::number(qAbs(newFilesPosition + 1 - 9));
             currentMove += "xN" + ranks + file;
 
             if (pieces.value(QPair<int, int>(newRanksPosition, newFilesPosition)).color == "WHITE")
             {
+
                 existWhitePiecesMap[3]--;
-                //superiority = -3;
+                superiority = -3;
             }
             else
             {
+
                 existBlackPiecesMap[3]--;
-                //superiority = 3;
+                superiority = 3;
             }
         }
         else if (pieces.value(QPair<int, int>(newRanksPosition, newFilesPosition)).type == "bishop")
         {
+
             QString ranks = set_rank_letter_from(newRanksPosition);
             QString file = QString::number(qAbs(newFilesPosition + 1 - 9));
             currentMove += "xB" + ranks + file;
 
             if (pieces.value(QPair<int, int>(newRanksPosition, newFilesPosition)).color == "WHITE")
             {
+
                 existWhitePiecesMap[3]--;
-                //superiority -= 3;
+                superiority = -3;
             }
             else
             {
+
                 existBlackPiecesMap[3]--;
-                //superiority += 3;
+                superiority = 3;
             }
         }
         else if (pieces.value(QPair<int, int>(newRanksPosition, newFilesPosition)).type == "rook")
         {
+
             QString ranks = set_rank_letter_from(newRanksPosition);
             QString file = QString::number(qAbs(newFilesPosition + 1 - 9));
             currentMove += "xR" + ranks + file;
 
             if (pieces.value(QPair<int, int>(newRanksPosition, newFilesPosition)).color == "WHITE")
             {
+
                 existWhitePiecesMap[5]--;
-                //superiority -= 5;
+                superiority = -5;
             }
             else
             {
+
                 existBlackPiecesMap[5]--;
-                //superiority += 5;
+                superiority = 5;
             }
         }
         else if (pieces.value(QPair<int, int>(newRanksPosition, newFilesPosition)).type == "queen")
         {
+
             QString ranks = set_rank_letter_from(newRanksPosition);
             QString file = QString::number(qAbs(newFilesPosition + 1 - 9));
             currentMove += "xQ" + ranks + file;
 
             if (pieces.value(QPair<int, int>(newRanksPosition, newFilesPosition)).color == "WHITE")
             {
+
                 existWhitePiecesMap[9]--;
-                //superiority -= 9;
+                superiority = -9;
             }
             else
             {
+
                 existBlackPiecesMap[9]--;
-                // superiority += 9;
+                superiority = 9;
             }
         }
     }
@@ -1555,4 +1666,9 @@ DraggableLabel *Piece::get_piece_label()
 bool Piece::is_ready_to_castling() const
 {
     return pieceInfo.readyToCastling;
+}
+
+void Piece::set_player_color(QString color)
+{
+    playerColor = color;
 }
