@@ -36,10 +36,7 @@ CLSID BluetoothServer::create_clsid()
 {
     LPCOLESTR unicqueLine = L"{a75bc649-c8f8-48ff-992e-bbe8446a0ae2}";
     CLSID clsid;
-    HRESULT is_error = CLSIDFromString(unicqueLine, &clsid);//из текстового представления в структурное
-    if (is_error != NOERROR)
-    {
-    }
+    CLSIDFromString(unicqueLine, &clsid);
     return clsid;
 }
 
@@ -47,7 +44,6 @@ bool BluetoothServer::bind_to_server_address()
 {
     if (bind(server, (sockaddr *)&sockAddrBth, sizeof(sockAddrBth)) == SOCKET_ERROR)
     {
-        close_server();
         return false;
     }
     return true;
@@ -57,7 +53,6 @@ bool BluetoothServer::listen_chanel()
 {
     if (listen(server, SOMAXCONN) != 0)
     {
-        close_server();
         return false;
     }
     return true;
@@ -69,10 +64,8 @@ bool BluetoothServer::accept_connection()
     clientInfo = accept(server, (sockaddr *)&client, &clientSize);
     if (clientInfo == INVALID_SOCKET)
     {
-        close_server();
         return false;
     }
-    closesocket(server);
     return true;
 }
 
@@ -85,7 +78,7 @@ string BluetoothServer::receive_move()
                          0);
     if (bytesRead == SOCKET_ERROR)
     {
-        return "close_server";
+        return "resign";
     }
     return string(requestBuffer).substr(0, bytesRead);
 }
@@ -95,16 +88,21 @@ int BluetoothServer::send_move(string move)
     return send(clientInfo, move.c_str(), move.size(), MSG_OOB);
 }
 
-void BluetoothServer::close_server()
-{
-    closesocket(server);
-    WSACleanup();
-}
-
 void BluetoothServer::close_client()
 {
-    shutdown(clientInfo, SD_SEND);
-    closesocket(clientInfo);
-    WSACleanup();
+    if (clientInfo != INVALID_SOCKET)
+    {
+        shutdown(clientInfo, SD_BOTH);
+        closesocket(clientInfo);
+        WSACleanup();
+        cout << "WSACLEANUP";
+    }
+    if (server != INVALID_SOCKET)
+    {
+        closesocket(server);
+        WSACleanup();
+        cout << "WSACLEANUP";
+    }
+
 }
 

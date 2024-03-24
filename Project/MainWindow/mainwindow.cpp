@@ -49,13 +49,11 @@ MainWindow::~MainWindow()
     delete archiveTab;
 
     emit signal_to_close_client();
-    delete thClient;
     threadClient->quit();
     threadClient->wait();
     delete threadClient;
 
     emit signal_to_close_server();
-    delete thServer;
     threadServer->quit();
     threadServer->wait();
     delete threadServer;
@@ -116,6 +114,22 @@ void MainWindow::add_piece_labels()
     gameTab->get_batch()->get_chess_board()->show();
 }
 
+void MainWindow::delete_piece_labels()
+{
+    foreach (DraggableLabel *child, ui->widget->findChildren<DraggableLabel *>())
+    {
+        qDebug() << child;
+        child->deleteLater();
+    }
+    foreach (ClickableLabel *child, ui->widget->findChildren<ClickableLabel *>())
+    {
+        qDebug() << child;
+        child->deleteLater();
+    }
+    gameTab->end_batch();
+    qDebug() << "gameTab";
+}
+
 void MainWindow::slot_to_remove_opponent_piece_label(DraggableLabel *pieceLabel)
 {
     pieceLabel->deleteLater();
@@ -170,13 +184,16 @@ void MainWindow::slot_to_show_move(QString currentMoveRecord, int super, QPair<Q
     }
     if (superiority > 0)
     {
+        qDebug() << "+";
         ui->opponentSuperiority->clear();
         ui->playerSuperiority->setText("+" + QString::number(qAbs(superiority)));
     }
     else if (superiority < 0)
     {
+        qDebug() << "-";
         ui->playerSuperiority->clear();
         ui->opponentSuperiority->setText("+" + QString::number(qAbs(superiority)));
+
     }
     else
     {
@@ -201,12 +218,38 @@ void MainWindow::slot_to_show_move(QString currentMoveRecord, int super, QPair<Q
             if (thClient != nullptr)
             {
                 emit signal_to_send_from_client(currentMoveString);
-                emit signal_to_receive_to_client();
+                if (currentMoveRecord.contains("#"))
+                {
+                    checkmate_for_black(moveToArchive);
+                    return;
+                }
+                else if (currentMoveRecord.contains("="))
+                {
+                    find_draw(moveToArchive);
+                    return;
+                }
+                else
+                {
+                    emit signal_to_receive_to_client();
+                }
             }
             else
             {
                 emit signal_to_send_from_server(currentMoveString);
-                emit signal_to_receive_to_server();
+                if (currentMoveRecord.contains("#"))
+                {
+                    checkmate_for_white(moveToArchive);
+                    return;
+                }
+                else if (currentMoveRecord.contains("="))
+                {
+                    find_draw(moveToArchive);
+                    return;
+                }
+                else
+                {
+                    emit signal_to_receive_to_server();
+                }
             }
         }
         else
@@ -271,7 +314,7 @@ void MainWindow::on_giveUpButton_clicked()
         add_move_to_batch_records("\nBlack win! Opponent resigned\n\n\n");
         ui->movesList->addItem("Black win! Opponent resigned");
         QMessageBox::information(this, "End of game", "Black win! Opponent resigned");
-        emit signal_to_send_from_client("");
+        emit signal_to_send_from_client("resign");
     }
     else
     {
@@ -280,7 +323,7 @@ void MainWindow::on_giveUpButton_clicked()
         add_move_to_batch_records("\nWhite win! Opponent resigned\n\n\n");
         ui->movesList->addItem("White win! Opponent resigned");
         QMessageBox::information(this, "End of game", "White win! Opponent resigned");
-        emit signal_to_send_from_server("");
+        emit signal_to_send_from_server("resign");
     }
 }
 
@@ -307,6 +350,8 @@ void MainWindow::on_whiteButton_clicked()
 
     thClient->moveToThread(threadClient);
     threadClient->start();
+
+    connect(threadClient, &QThread::finished, thClient, &QObject::deleteLater);
 
     QObject::connect(thClient, SIGNAL(signal_for_error()), this, SLOT(slot_for_error()));
     QObject::connect(thClient, SIGNAL(signal_to_get_devices_list(QStringList)), this, SLOT(slot_to_get_devices_list(QStringList)));
@@ -344,6 +389,8 @@ void MainWindow::on_blackButton_clicked()
 
     thServer->moveToThread(threadServer);
     threadServer->start();
+
+    connect(threadServer, &QThread::finished, thServer, &QObject::deleteLater);
 
     QObject::connect(thServer, SIGNAL(signal_for_error()), this, SLOT(slot_for_error()));
     QObject::connect(thServer, SIGNAL(signal_for_accepted_connection(QString)), this, SLOT(slot_for_accepted_connection(QString)));
@@ -421,11 +468,15 @@ void MainWindow::slot_for_accepted_connection(QString color)
 
     if (thClient != nullptr)
     {
+        ui->playerLabel->setText("Player");
+        ui->opponentLabel->setText("Opponent");
         change_statistics(1);
         change_statistics(2);
     }
     else
     {
+        ui->playerLabel->setText("Opponent");
+        ui->opponentLabel->setText("Player");
         change_statistics(1);
         change_statistics(3);
         ui->giveUpButton->setEnabled(false);
@@ -506,7 +557,6 @@ void MainWindow::end_client_thread()
 {
     qDebug() << "end_client";
     emit signal_to_close_client();
-    delete thClient;
     threadClient->quit();
     threadClient->wait();
     delete threadClient;
@@ -520,7 +570,6 @@ void MainWindow::end_server_thread()
 {
     qDebug() << "end_server";
     emit signal_to_close_server();
-    delete thServer;
     threadServer->quit();
     threadServer->wait();
     delete threadServer;
@@ -533,11 +582,15 @@ void MainWindow::end_server_thread()
 void MainWindow::set_to_return()
 {
     qDebug() << "set_to_return";
-    gameTab->end_batch();
+    delete_piece_labels();
+    qDebug() << "set_to_return";
     ui->gameTabWidget->setCurrentIndex(0);
+    qDebug() << "set_to_return";
     add_gif();
+    qDebug() << "set_to_return";
     ui->whiteButton->setEnabled(true);
     ui->blackButton->setEnabled(true);
+    qDebug() << "set_to_return";
 }
 
 void MainWindow::checkmate_for_black(QString moveToArchive)
@@ -550,12 +603,13 @@ void MainWindow::checkmate_for_black(QString moveToArchive)
     {
         change_statistics(4);
         change_statistics(5);
+        slot_to_end_client();
     }
     else
     {
         change_statistics(7);
         change_statistics(9);
-        emit signal_to_send_from_server("checkmate");
+        slot_to_end_server();
     }
 }
 
@@ -569,12 +623,13 @@ void MainWindow::checkmate_for_white(QString moveToArchive)
     {
         change_statistics(7);
         change_statistics(8);
-        emit signal_to_send_from_client("checkmate");
+        slot_to_end_client();
     }
     else
     {
         change_statistics(4);
         change_statistics(6);
+        slot_to_end_server();
     }
 }
 
@@ -685,7 +740,7 @@ void MainWindow::add_move_to_batch_records(QString moveRecord)
         out << moveRecord;
         if (moveRecord.contains(". "))
         {
-            out << "    ";
+            out << "        ";
         }
         else
         {

@@ -48,6 +48,8 @@ private slots:
 
     void add_piece_labels();
 
+    void delete_piece_labels();
+
     void slot_to_remove_opponent_piece_label(DraggableLabel *);
 
     void slot_to_promote_pawn(DraggableLabel *, QString &);

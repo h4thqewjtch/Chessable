@@ -54,13 +54,6 @@ protected:
     void put_kings();
     void put_pawns();
 
-    void clear_rooks();
-    void clear_knights();
-    void clear_bishops();
-    void clear_queens();
-    void clear_kings();
-    void clear_pawns();
-
 signals:
     void signal_to_remove_opponent_piece_label(DraggableLabel *);
     void signal_to_promote_pawn(DraggableLabel *, QString &);
@@ -83,14 +76,8 @@ public:
 
     ~Batch()
     {
+        qDebug() << "~Batch()";
         delete chessBoard;
-
-        clear_rooks();
-        clear_knights();
-        clear_bishops();
-        clear_queens();
-        clear_kings();
-        clear_pawns();
     }
 
     void set_player_color(QString);
@@ -102,6 +89,13 @@ public:
     void set_current_new_piece_type_and_image_path(QString, QString);
 
     Piece *get_current_new_piece();
+
+    void clear_rooks();
+    void clear_knights();
+    void clear_bishops();
+    void clear_queens();
+    void clear_kings();
+    void clear_pawns();
 };
 
 #endif // BATCH_H

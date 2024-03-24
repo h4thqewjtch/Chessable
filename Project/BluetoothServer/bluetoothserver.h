@@ -26,13 +26,12 @@ private:
     BLUETOOTH_FIND_RADIO_PARAMS bthFindRadioParams = { sizeof(BLUETOOTH_FIND_RADIO_PARAMS) };
     BLUETOOTH_RADIO_INFO bthRadioInfo = { sizeof(BLUETOOTH_RADIO_INFO), 0, };
     WSADATA wsData;
-    SOCKET server;
+    SOCKET server = INVALID_SOCKET;
     SOCKADDR_BTH sockAddrBth;
-    SOCKET clientInfo;
+    SOCKET clientInfo = INVALID_SOCKET;
     SOCKADDR_BTH client;
 
     CLSID create_clsid();
-    void close_server();
 
 public:
     BluetoothServer() {}

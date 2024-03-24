@@ -88,7 +88,6 @@ bool BluetoothClient::connect_to_server()
     int connRes = connect(client, (sockaddr *)&sockAddrBth, sizeof(sockAddrBth));
     if (connRes == SOCKET_ERROR)
     {
-        close_client();
         return false;
     }
     return true;
@@ -108,14 +107,18 @@ string BluetoothClient::receive_move()
                          0);
     if (bytesRead == SOCKET_ERROR)
     {
-        return "close_client";
+        return "resign";
     }
     return string(requestBuffer).substr(0, bytesRead);
 }
 
 void BluetoothClient::close_client()
 {
-    shutdown(client, SD_SEND);
-    closesocket(client);
-    WSACleanup();
+    if (client != INVALID_SOCKET)
+    {
+        shutdown(client, SD_BOTH);
+        closesocket(client);
+        WSACleanup();
+        cout << "WSACLEANUP";
+    }
 }

@@ -31,5 +31,13 @@ Batch *GameTab::get_batch()
 
 void GameTab::end_batch()
 {
+    batch->clear_bishops();
+    batch->clear_kings();
+    batch->clear_knights();
+    batch->clear_pawns();
+    batch->clear_queens();
+    batch->clear_rooks();
+    qDebug() << "end_batch()";
     delete batch;
+    qDebug() << "delete";
 }

@@ -44,6 +44,7 @@ void ThreadClient::slot_to_send_from_client(QString currentMoveString)
     if (size != SOCKET_ERROR)
     {
         if (currentMoveString == ""
+                || currentMoveString == "resign"
                 || currentMoveString == "checkmate")
         {
             emit signal_to_end_client();
@@ -56,7 +57,7 @@ void ThreadClient::slot_to_receive_to_client()
     qDebug() << "slot_to_receive_to_client";
     QString opponentMove = QString::fromStdString(bluetoothClient->receive_move());
     qDebug() << "opponentMove: " << opponentMove;
-    if (opponentMove == "")
+    if (opponentMove == "" || opponentMove == "resign")
     {
         emit signal_for_error_opponent();
     }
